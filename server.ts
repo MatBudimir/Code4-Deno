@@ -25,6 +25,12 @@ Deno.serve((request) => {
     });
   }
 
+    if (pathname === "/style.css") {
+    return new Response(Deno.readTextFileSync("./public/style.css"), {
+      headers: { "content-type": "text/plain" },
+    });
+  }
+
   if (pathname === "/client.js") {
     return new Response(Deno.readTextFileSync("./public/client.js"), {
       headers: { "content-type": "application/javascript" },
