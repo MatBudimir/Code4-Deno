@@ -1,0 +1,15 @@
+.sprite {
+    max-width: 32px;
+    max-height: 32px;
+}
+
+canvas {
+    background: white;
+    justify-content: center;
+}
+
+html {
+    color: azure;
+    background-image: url(800.jpg);
+    background-size: 20%;
+}
