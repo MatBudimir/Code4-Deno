@@ -27,7 +27,7 @@ Deno.serve((request) => {
 
     if (pathname === "/style.css") {
     return new Response(Deno.readTextFileSync("./public/style.css"), {
-      headers: { "content-type": "text/plain" },
+      headers: { "content-type": "text/css" },
     });
   }
 
