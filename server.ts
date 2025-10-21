@@ -101,7 +101,7 @@ Deno.serve(async (request) => {
           if (otherId === id) continue;
           const runner = players[otherId];
           const d = calcDist(p.x, p.y, runner.x, runner.y);
-          if (d > 30) {
+          if (d < 30) {
             p.tag = false;
             runner.tag = true;
             tagCooldown = 30;
