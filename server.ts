@@ -45,59 +45,66 @@ Deno.serve(async (request) => {
     });
   }
 
-    if (pathname === "/Sprites/player2.png") {
+  if (pathname === "/Sprites/player2.png") {
     const image = await Deno.readFile("./public/Sprites/player2.png");
     return new Response(image, {
       headers: { "content-type": "image/png" },
     });
   }
 
-if (pathname === "/client.js") {
-  return new Response(Deno.readTextFileSync("./public/client.js"), {
-    headers: { "content-type": "application/javascript" },
-  });
-}
-
-// WebSocket for game
-if (pathname === "/ws") {
-  if (request.headers.get("upgrade") !== "websocket") {
-    return new Response(null, { status: 501 });
+  if (pathname === "/Sprites/player3.png") {
+    const image = await Deno.readFile("./public/Sprites/player3.png");
+    return new Response(image, {
+      headers: { "content-type": "image/png" },
+    });
   }
 
-  const { socket, response } = Deno.upgradeWebSocket(request);
-  const id = crypto.randomUUID();
+  if (pathname === "/client.js") {
+    return new Response(Deno.readTextFileSync("./public/client.js"), {
+      headers: { "content-type": "application/javascript" },
+    });
+  }
 
-  players[id] = { id, x: 100, y: 100 };
-  sockets.set(id, socket);
-
-  socket.addEventListener("open", () => {
-    console.log(`Player ${id} connected`);
-    socket.send(JSON.stringify({ type: "init", id, players }));
-    broadcast({ type: "join", player: players[id] }, id);
-  });
-
-  socket.addEventListener("message", (event) => {
-    const msg = JSON.parse(event.data);
-    if (msg.type === "move") {
-      const p = players[id];
-      if (!p) return;
-      if (msg.dir === "up") p.y -= 10;
-      if (msg.dir === "down") p.y += 10;
-      if (msg.dir === "left") p.x -= 10;
-      if (msg.dir === "right") p.x += 10;
-      broadcast({ type: "update", player: p });
+  // WebSocket for game
+  if (pathname === "/ws") {
+    if (request.headers.get("upgrade") !== "websocket") {
+      return new Response(null, { status: 501 });
     }
-  });
 
-  socket.addEventListener("close", () => {
-    console.log(`Player ${id} disconnected`);
-    delete players[id];
-    sockets.delete(id);
-    broadcast({ type: "leave", id });
-  });
+    const { socket, response } = Deno.upgradeWebSocket(request);
+    const id = crypto.randomUUID();
 
-  return response;
-}
+    players[id] = { id, x: 100, y: 100 };
+    sockets.set(id, socket);
 
-return new Response("Not found", { status: 404 });
+    socket.addEventListener("open", () => {
+      console.log(`Player ${id} connected`);
+      socket.send(JSON.stringify({ type: "init", id, players }));
+      broadcast({ type: "join", player: players[id] }, id);
+    });
+
+    socket.addEventListener("message", (event) => {
+      const msg = JSON.parse(event.data);
+      if (msg.type === "move") {
+        const p = players[id];
+        if (!p) return;
+        if (msg.dir === "up") p.y -= 10;
+        if (msg.dir === "down") p.y += 10;
+        if (msg.dir === "left") p.x -= 10;
+        if (msg.dir === "right") p.x += 10;
+        broadcast({ type: "update", player: p });
+      }
+    });
+
+    socket.addEventListener("close", () => {
+      console.log(`Player ${id} disconnected`);
+      delete players[id];
+      sockets.delete(id);
+      broadcast({ type: "leave", id });
+    });
+
+    return response;
+  }
+
+  return new Response("Not found", { status: 404 });
 });
