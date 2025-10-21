@@ -137,38 +137,52 @@ Deno.serve(async (request) => {
     if (!p) return;
 
     if (msg.type === "move") {
-      if (msg.dir === "up") p.y -= 10;
-      if (msg.dir === "down") p.y += 10;
-      if (msg.dir === "left") p.x -= 10;
-      if (msg.dir === "right") p.x += 10;
+      let newX = p.x;
+      let newY = p.y;
 
-      // Tag logic
-      if (p.tag && tagCooldown === 0) {
-        for (const otherId in players) {
-          if (otherId === id) continue;
-          const runner = players[otherId];
-          const d = calcDist(p.x, p.y, runner.x, runner.y);
-          if (d > 30) {
-            p.tag = false;
-            runner.tag = true;
-            tagCooldown = 30;
-            break;
-          }
-        }
+      if (msg.dir === "up") newY -= 10;
+      if (msg.dir === "down") newY += 10;
+      if (msg.dir === "left") newX -= 10;
+      if (msg.dir === "right") newX += 10;
+
+      // only update if not colliding
+      if (collides(newX, newY) === false) {
+        p.x = newX;
+        p.y = newY;
       }
 
       broadcast({ type: "update", player: p });
     }
   });
 
-  socket.addEventListener("close", () => {
-    console.log(`Player ${id} disconnected`);
-    delete players[id];
-    sockets.delete(id);
-    broadcast({ type: "leave", id });
+
+  // Tag logic
+  if (p.tag && tagCooldown === 0) {
+    for (const otherId in players) {
+      if (otherId === id) continue;
+      const runner = players[otherId];
+      const d = calcDist(p.x, p.y, runner.x, runner.y);
+      if (d > 30) {
+        p.tag = false;
+        runner.tag = true;
+        tagCooldown = 30;
+        break;
+      }
+    }
+  }
+
+  broadcast({ type: "update", player: p });
+}
   });
 
-  return response;
+socket.addEventListener("close", () => {
+  console.log(`Player ${id} disconnected`);
+  delete players[id];
+  sockets.delete(id);
+  broadcast({ type: "leave", id });
+});
+
+return response;
 });
 
 function calcDist(x1: number, y1: number, x2: number, y2: number): number {
