@@ -11,6 +11,47 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 const sockets = new Map();
 const players = {};
 let tagCooldown = 0;
+const CANVAS_WIDTH = 1600;
+const CANVAS_HEIGHT = 550;
+// Obstacles 
+const obstacles = [
+    // Left corridor walls
+    { x: 100, y: 50, width: 30, height: 450 },
+    { x: 300, y: 50, width: 30, height: 450 },
+    // Right corridor walls
+    { x: 1300, y: 50, width: 30, height: 450 },
+    { x: 1500, y: 50, width: 30, height: 450 },
+    // Middle 
+    { x: 600, y: 100, width: 150, height: 30 },
+    { x: 800, y: 200, width: 150, height: 30 },
+    { x: 600, y: 300, width: 150, height: 30 },
+    { x: 800, y: 400, width: 150, height: 30 },
+    // Square
+    { x: 1150, y: 100, width: 80, height: 80 },
+    // Bottom 
+    { x: 500, y: 470, width: 200, height: 30 },
+    { x: 1000, y: 470, width: 200, height: 30 },
+];
+// Collision 
+function collides(x, y, size = 32) {
+    for (let i = 0; i < obstacles.length; i++) {
+        const o = obstacles[i];
+        let playerLeft = x;
+        let playerRight = x + size;
+        let playerTop = y;
+        let playerBottom = y + size;
+        let obstacleLeft = o.x;
+        let obstacleRight = o.x + o.width;
+        let obstacleTop = o.y;
+        let obstacleBottom = o.y + o.height;
+        let overlapX = playerLeft < obstacleRight && playerRight > obstacleLeft;
+        let overlapY = playerTop < obstacleBottom && playerBottom > obstacleTop;
+        if (overlapX && overlapY) {
+            return true;
+        }
+    }
+    return false;
+}
 setTimeout(updateTimer, 500);
 function broadcast(message, except) {
     for (const [id, socket] of sockets) {
@@ -34,6 +75,12 @@ Deno.serve((request) => __awaiter(void 0, void 0, void 0, function* () {
     }
     if (pathname === "/background.jpg") {
         const image = yield Deno.readFile("./public/background.jpg");
+        return new Response(image, {
+            headers: { "content-type": "image/jpeg" },
+        });
+    }
+    if (pathname === "/canvasbg.jpg") {
+        const image = yield Deno.readFile("./public/canvasbg.jpg");
         return new Response(image, {
             headers: { "content-type": "image/jpeg" },
         });
@@ -77,31 +124,47 @@ Deno.serve((request) => __awaiter(void 0, void 0, void 0, function* () {
         if (!p)
             return;
         if (msg.type === "move") {
+            let newX = p.x;
+            let newY = p.y;
             if (msg.dir === "up")
-                p.y -= 10;
+                newY -= 10;
             if (msg.dir === "down")
-                p.y += 10;
+                newY += 10;
             if (msg.dir === "left")
-                p.x -= 10;
+                newX -= 10;
             if (msg.dir === "right")
-                p.x += 10;
-            // Tag logic
-            if (p.tag && tagCooldown === 0) {
-                for (const otherId in players) {
-                    if (otherId === id)
-                        continue;
-                    const runner = players[otherId];
-                    const d = calcDist(p.x, p.y, runner.x, runner.y);
-                    if (d > 30) {
-                        p.tag = false;
-                        runner.tag = true;
-                        tagCooldown = 30;
-                        break;
-                    }
-                }
+                newX += 10;
+            // only update if not colliding
+            if (collides(newX, newY) === false) {
+                p.x = newX;
+                p.y = newY;
+                if (p.x < 0)
+                    p.x = CANVAS_WIDTH;
+                if (p.x > CANVAS_WIDTH)
+                    p.x = 0;
+                if (p.y < 0)
+                    p.y = CANVAS_HEIGHT;
+                if (p.y > CANVAS_HEIGHT)
+                    p.y = 0;
             }
             broadcast({ type: "update", player: p });
         }
+        // Tag logic
+        if (p.tag && tagCooldown === 0) {
+            for (const otherId in players) {
+                if (otherId === id)
+                    continue;
+                const runner = players[otherId];
+                const d = calcDist(p.x, p.y, runner.x, runner.y);
+                if (d > 30) {
+                    p.tag = false;
+                    runner.tag = true;
+                    tagCooldown = 30;
+                    break;
+                }
+            }
+        }
+        broadcast({ type: "update", player: p });
     });
     socket.addEventListener("close", () => {
         console.log(`Player ${id} disconnected`);
