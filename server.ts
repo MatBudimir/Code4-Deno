@@ -2,10 +2,12 @@ interface Player {
   id: string;
   x: number;
   y: number;
+  tag: boolean;
 }
 
 const players: Record<string, Player> = {};
 const sockets = new Map<string, WebSocket>();
+let tagCooldown = 0;
 
 function broadcast(message: unknown, except?: string) {
   for (const [id, socket] of sockets) {
@@ -53,7 +55,7 @@ if (pathname === "/ws") {
   const { socket, response } = Deno.upgradeWebSocket(request);
   const id = crypto.randomUUID();
 
-  players[id] = { id, x: 100, y: 100 };
+  players[id] = { id, x: 100, y: 100, tag: false };
   sockets.set(id, socket);
 
   socket.addEventListener("open", () => {
@@ -71,6 +73,21 @@ if (pathname === "/ws") {
       if (msg.dir === "down") p.y += 10;
       if (msg.dir === "left") p.x -= 10;
       if (msg.dir === "right") p.x += 10;
+
+      if (p.tag == true) {
+        for (const id in players) {
+          const runner = players[id];
+          if (runner == p) {
+            return
+          }
+          const d = calcDist(p, runner);
+          if (d > 30 && tagCooldown == 0) {
+            p.tag = false;
+            runner.tag = true;
+            tagCooldown += 30;
+          }
+        }
+      }
       broadcast({ type: "update", player: p });
     }
   });
@@ -87,3 +104,19 @@ if (pathname === "/ws") {
 
 return new Response("Not found", { status: 404 });
 });
+
+function calcDist(tagger: Player, runner: Player): number {
+  const tX = tagger.x;
+  const tY = tagger.y;
+  const rX = runner.x;
+  const rY = runner.y;
+  const distance = Math.sqrt((rX-tX)^2 + (rY-tY)^2);
+  return distance;
+}
+
+function updateTimer():void {
+  if (tagCooldown > 0) {
+    tagCooldown -= 1;
+  }
+  requestAnimationFrame(updateTimer);
+}
