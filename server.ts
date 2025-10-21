@@ -8,7 +8,8 @@ interface Player {
 const players: Record<string, Player> = {};
 const sockets = new Map<string, WebSocket>();
 let tagCooldown = 0;
-updateTimer();
+
+setTimeout(updateTimer, 500);
 
 function broadcast(message: unknown, except?: string) {
   for (const [id, socket] of sockets) {
@@ -116,7 +117,6 @@ function updateTimer():void {
   if (tagCooldown > 0) {
     tagCooldown -= 1;
   }
-  requestAnimationFrame(updateTimer);
 }
 
 function generateSpawnpoint(): number[] {
