@@ -173,14 +173,18 @@ Deno.serve(async (request) => {
         if (otherId === id) continue;
         const runner = players[otherId];
         const d = calcDist(p.x, p.y, runner.x, runner.y);
-        console.log(d);
         if (d < 30) {
           p.tag = false;
           runner.tag = true;
           tagCooldown = 30;
+
+          broadcast({ type: "update", player: p });
+          broadcast({ type: "update", player: runner });
           break;
         }
       }
+    } else {
+      broadcast({ type: "update", player: p });
     }
 
     // only update if not colliding
