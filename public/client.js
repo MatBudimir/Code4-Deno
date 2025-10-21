@@ -67,9 +67,9 @@ function gameLoop(sprite) {
     for (const id in players) {
         const p = players[id];
         let img = id === myId ? sprites.player1 : sprites.player2;
-        // if (p.tag == true) {
-        //   img = sprites.player3;
-        // }
+        if (p.tag == true) {
+            img = sprites.player3;
+        }
         ctx.drawImage(img, p.x, p.y);
         //ctx.fillStyle = id === myId ? "blue" : "red";
         //ctx.fillRect(p.x, p.y, 20, 20);
