@@ -11,6 +11,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 const sockets = new Map();
 const players = {};
 let tagCooldown = 0;
+const CANVAS_WIDTH = 1600;
+const CANVAS_HEIGHT = 550;
 // Obstacles 
 const obstacles = [
     // Left corridor walls
@@ -130,6 +132,14 @@ Deno.serve((request) => __awaiter(void 0, void 0, void 0, function* () {
             if (collides(newX, newY) === false) {
                 p.x = newX;
                 p.y = newY;
+                if (p.x < 0)
+                    p.x = CANVAS_WIDTH;
+                if (p.x > CANVAS_WIDTH)
+                    p.x = 0;
+                if (p.y < 0)
+                    p.y = CANVAS_HEIGHT;
+                if (p.y > CANVAS_HEIGHT)
+                    p.y = 0;
             }
             broadcast({ type: "update", player: p });
         }
