@@ -91,6 +91,13 @@ Deno.serve(async (request) => {
     });
   }
 
+  if (pathname === "/canvasbg.jpg") {
+    const image = await Deno.readFile("./public/canvasbg.jpg");
+    return new Response(image, {
+      headers: { "content-type": "image/jpeg" },
+    });
+  }
+
   if (pathname === "/Sprites/player1.png") {
     const image = await Deno.readFile("./public/Sprites/player1.png");
     return new Response(image, {

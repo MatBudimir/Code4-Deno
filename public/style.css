@@ -4,6 +4,8 @@
 }
 
 canvas {
+    background-image: url("canvasbg.jpg");
+    background-repeat: repeat;
     background: white;
     justify-content: center;
     border: 1px solid red;
