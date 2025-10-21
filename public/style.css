@@ -6,11 +6,8 @@
 canvas {
     background-image: url("canvasbg.jpg");
     background-repeat: repeat;
-    background: white;
-    justify-content: center;
+    background-size: 25%;
     border: 1px solid red;
-    width: 99%;
-    height: 70%;
 }
 
 html {
