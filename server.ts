@@ -8,6 +8,7 @@ interface Player {
 const sockets = new Map<string, WebSocket>();
 const players: Record<string, Player> = {};
 let tagCooldown = 0;
+let tagger = false;
 
 const CANVAS_WIDTH = 1600;
 const CANVAS_HEIGHT = 550;
@@ -135,7 +136,14 @@ Deno.serve(async (request) => {
   const spawn = generateSpawnpoint();
   const spawnX = spawn[0];
   const spawnY = spawn[1];
-  players[id] = { id, x: spawnX, y: spawnY, tag: false };
+
+  let newPlayerTag = false;
+  if (!tagger) {
+    newPlayerTag = true;
+    tagger = true;
+  }
+
+  players[id] = { id, x: spawnX, y: spawnY, tag: newPlayerTag };
   sockets.set(id, socket);
 
   socket.addEventListener("open", () => {
@@ -149,14 +157,28 @@ Deno.serve(async (request) => {
     const p = players[id];
     if (!p) return;
 
-    if (msg.type === "move") {
-      let newX = p.x;
+          let newX = p.x;
       let newY = p.y;
-
+    
+    if (msg.type === "move") {
       if (msg.dir === "up") newY -= 10;
       if (msg.dir === "down") newY += 10;
       if (msg.dir === "left") newX -= 10;
       if (msg.dir === "right") newX += 10;
+
+      // Tag logic
+      if (p.tag && tagCooldown === 0) {
+        for (const otherId in players) {
+          if (otherId === id) continue;
+          const runner = players[otherId];
+          const d = calcDist(p.x, p.y, runner.x, runner.y);
+          if (d < 30) {
+            p.tag = false;
+            runner.tag = true;
+            tagCooldown = 30;
+            break;
+          }
+        }
 
       // only update if not colliding
       if (collides(newX, newY) === false) {
@@ -168,32 +190,14 @@ Deno.serve(async (request) => {
         if (p.y < 0) p.y = CANVAS_HEIGHT;
         if (p.y > CANVAS_HEIGHT) p.y = 0;
 
-
-      }
-
-      broadcast({ type: "update", player: p });
-    }
-
-    // Tag logic
-    if (p.tag && tagCooldown === 0) {
-      for (const otherId in players) {
-        if (otherId === id) continue;
-        const runner = players[otherId];
-        const d = calcDist(p.x, p.y, runner.x, runner.y);
-        if (d > 30) {
-          p.tag = false;
-          runner.tag = true;
-          tagCooldown = 30;
-          break;
-        }
-      }
-    }
-
     broadcast({ type: "update", player: p });
   });
 
   socket.addEventListener("close", () => {
     console.log(`Player ${id} disconnected`);
+    if(players[id].tag = true){
+      tagger = false;
+    }
     delete players[id];
     sockets.delete(id);
     broadcast({ type: "leave", id });
