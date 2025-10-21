@@ -38,14 +38,14 @@ Deno.serve(async (request) => {
     });
   }
 
-  if (pathname === "/player1.png") {
+  if (pathname === "/Sprites/player1.png") {
     const image = await Deno.readFile("./public/Sprites/player1.png");
     return new Response(image, {
       headers: { "content-type": "image/png" },
     });
   }
 
-    if (pathname === "/player2.png") {
+    if (pathname === "/Sprites/player2.png") {
     const image = await Deno.readFile("./public/Sprites/player2.png");
     return new Response(image, {
       headers: { "content-type": "image/png" },
