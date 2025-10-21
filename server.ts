@@ -112,7 +112,7 @@ Deno.serve(async (request) => {
     const { socket, response } = Deno.upgradeWebSocket(request);
     const id = crypto.randomUUID();
 
-    players[id] = { id, x: 100, y: 100 };
+    players[id] = { id, x: 100, y: 100, tag: false };
     sockets.set(id, socket);
 
     socket.addEventListener("open", () => {
@@ -142,17 +142,17 @@ Deno.serve(async (request) => {
     });
 
     return response;
-  }
+  });
 
   return new Response("Not found", { status: 404 });
 });
 
 function calcDist(x1: number, y1: number, x2: number, y2: number): number {
-  const distance = Math.sqrt((x2-x1)^2 + (y2-x2)^2);
+  const distance = Math.sqrt((x2 - x1) ^ 2 + (y2 - x2) ^ 2);
   return distance;
 }
 
-function updateTimer():void {
+function updateTimer(): void {
   if (tagCooldown > 0) {
     tagCooldown -= 1;
   }

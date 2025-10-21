@@ -102,7 +102,7 @@ Deno.serve((request) => __awaiter(void 0, void 0, void 0, function* () {
         }
         const { socket, response } = Deno.upgradeWebSocket(request);
         const id = crypto.randomUUID();
-        players[id] = { id, x: 100, y: 100 };
+        players[id] = { id, x: 100, y: 100, tag: false };
         sockets.set(id, socket);
         socket.addEventListener("open", () => {
             console.log(`Player ${id} connected`);
