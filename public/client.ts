@@ -18,7 +18,9 @@ const sprites = {
 };
 
 sprites.player1.src = "Sprites/player1.png";
+sprites.player1.className = "sprite"
 sprites.player2.src = "Sprites/player2.png";
+sprites.player2.className = "sprite"
 
 socket.addEventListener("message", (event: MessageEvent) => {
   const msg = JSON.parse(event.data);

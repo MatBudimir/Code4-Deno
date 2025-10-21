@@ -10,7 +10,9 @@ const sprites = {
     player2: new Image(),
 };
 sprites.player1.src = "Sprites/player1.png";
+sprites.player1.className = "sprite";
 sprites.player2.src = "Sprites/player2.png";
+sprites.player2.className = "sprite";
 socket.addEventListener("message", (event) => {
     const msg = JSON.parse(event.data);
     if (msg.type === "init") {
@@ -61,7 +63,7 @@ function gameLoop(sprite) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     for (const id in players) {
         const p = players[id];
-        const img = id === myId ? sprites.player1 : sprites.player2;
+        requestAnimationFrame(gameLoop);
         ctx.drawImage(sprite, p.x, p.y);
         //ctx.fillStyle = id === myId ? "blue" : "red";
         //ctx.fillRect(p.x, p.y, 20, 20);
