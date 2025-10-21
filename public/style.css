@@ -6,7 +6,7 @@
 canvas {
     background-image: url("canvasbg.jpg");
     background-repeat: repeat;
-    background-size: 25%;
+    background-size: 5%;
     border: 1px solid red;
 }
 
