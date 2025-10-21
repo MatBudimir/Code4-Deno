@@ -101,11 +101,16 @@ function gameLoop(sprite: CanvasImageSource) {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   // draw obstacles
-  ctx.fillStyle = "rgba(0,0,0,0.7)";
+  ctx.fillStyle = "rgba(0, 0, 0, 0.9)";
+  ctx.strokeStyle = "red";
+  ctx.lineWidth = 2;
+
   for (let i = 0; i < obstacles.length; i++) {
     const o = obstacles[i];
     ctx.fillRect(o.x, o.y, o.width, o.height);
+    ctx.strokeRect(o.x, o.y, o.width, o.height);
   }
+
 
   for (const id in players) {
     const p = players[id];
