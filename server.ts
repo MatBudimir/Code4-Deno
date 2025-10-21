@@ -72,7 +72,9 @@ Deno.serve(async (request) => {
   const { socket, response } = Deno.upgradeWebSocket(request);
   const id = crypto.randomUUID();
 
-  const [spawnX, spawnY] = generateSpawnpoint();
+  const spawn = generateSpawnpoint();
+  const spawnX = spawn[0];
+  const spawnY = spawn[1];
   players[id] = { id, x: spawnX, y: spawnY, tag: false };
   sockets.set(id, socket);
 
@@ -137,6 +139,17 @@ function generateSpawnpoint(): number[] {
   const pos = [];
   const x = Math.floor(Math.random() * 1600);
   const y = Math.floor(Math.random() * 550);
+  for (const id in players) {
+    if(players[id].tag == true) {
+      const t = players[id];
+      const x2 = t.x;
+      const y2 = t.y;
+      const d = calcDist(x,y,x2,y2);
+      if(d <= 100) {
+        generateSpawnpoint()
+      }
+    }
+  }
   pos.push(x);
   pos.push(y);
   return pos;
