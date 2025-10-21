@@ -8,6 +8,7 @@ interface Player {
 const players: Record<string, Player> = {};
 const sockets = new Map<string, WebSocket>();
 let tagCooldown = 0;
+updateTimer();
 
 function broadcast(message: unknown, except?: string) {
   for (const [id, socket] of sockets) {
@@ -55,6 +56,7 @@ if (pathname === "/ws") {
   const { socket, response } = Deno.upgradeWebSocket(request);
   const id = crypto.randomUUID();
 
+
   players[id] = { id, x: 100, y: 100, tag: false };
   sockets.set(id, socket);
 
@@ -80,7 +82,7 @@ if (pathname === "/ws") {
           if (runner == p) {
             return
           }
-          const d = calcDist(p, runner);
+          const d = calcDist(p.x, p.y, runner.x, runner.y);
           if (d > 30 && tagCooldown == 0) {
             p.tag = false;
             runner.tag = true;
@@ -105,12 +107,8 @@ if (pathname === "/ws") {
 return new Response("Not found", { status: 404 });
 });
 
-function calcDist(tagger: Player, runner: Player): number {
-  const tX = tagger.x;
-  const tY = tagger.y;
-  const rX = runner.x;
-  const rY = runner.y;
-  const distance = Math.sqrt((rX-tX)^2 + (rY-tY)^2);
+function calcDist(x1: number, y1: number, x2: number, y2: number): number {
+  const distance = Math.sqrt((x2-x1)^2 + (y2-x2)^2);
   return distance;
 }
 
@@ -119,4 +117,13 @@ function updateTimer():void {
     tagCooldown -= 1;
   }
   requestAnimationFrame(updateTimer);
+}
+
+function generateSpawnpoint(): number[] {
+  const pos = [];
+  const x = Math.floor(Math.random() * 1600);
+  const y = Math.floor(Math.random() * 550);
+  pos.push(x);
+  pos.push(y);
+  return pos;
 }
