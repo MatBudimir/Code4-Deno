@@ -157,45 +157,48 @@ Deno.serve(async (request) => {
     const p = players[id];
     if (!p) return;
 
-          let newX = p.x;
-      let newY = p.y;
-    
+    let newX = p.x;
+    let newY = p.y;
+
     if (msg.type === "move") {
       if (msg.dir === "up") newY -= 10;
       if (msg.dir === "down") newY += 10;
       if (msg.dir === "left") newX -= 10;
       if (msg.dir === "right") newX += 10;
+    }
 
-      // Tag logic
-      if (p.tag && tagCooldown === 0) {
-        for (const otherId in players) {
-          if (otherId === id) continue;
-          const runner = players[otherId];
-          const d = calcDist(p.x, p.y, runner.x, runner.y);
-          if (d < 30) {
-            p.tag = false;
-            runner.tag = true;
-            tagCooldown = 30;
-            break;
-          }
+    // Tag logic
+    if (p.tag && tagCooldown === 0) {
+      for (const otherId in players) {
+        if (otherId === id) continue;
+        const runner = players[otherId];
+        const d = calcDist(p.x, p.y, runner.x, runner.y);
+        if (d < 30) {
+          p.tag = false;
+          runner.tag = true;
+          tagCooldown = 30;
+          break;
         }
+      }
+    }
 
-      // only update if not colliding
-      if (collides(newX, newY) === false) {
-        p.x = newX;
-        p.y = newY;
+    // only update if not colliding
+    if (collides(newX, newY) === false) {
+      p.x = newX;
+      p.y = newY;
 
-        if (p.x < 0) p.x = CANVAS_WIDTH;
-        if (p.x > CANVAS_WIDTH) p.x = 0;
-        if (p.y < 0) p.y = CANVAS_HEIGHT;
-        if (p.y > CANVAS_HEIGHT) p.y = 0;
+      if (p.x < 0) p.x = CANVAS_WIDTH;
+      if (p.x > CANVAS_WIDTH) p.x = 0;
+      if (p.y < 0) p.y = CANVAS_HEIGHT;
+      if (p.y > CANVAS_HEIGHT) p.y = 0;
 
-    broadcast({ type: "update", player: p });
+      broadcast({ type: "update", player: p });
+    }
   });
 
   socket.addEventListener("close", () => {
     console.log(`Player ${id} disconnected`);
-    if(players[id].tag = true){
+    if (players[id].tag = true) {
       tagger = false;
     }
     delete players[id];
@@ -222,12 +225,12 @@ function generateSpawnpoint(): number[] {
   const x = Math.floor(Math.random() * 1600);
   const y = Math.floor(Math.random() * 550);
   for (const id in players) {
-    if(players[id].tag == true) {
+    if (players[id].tag == true) {
       const t = players[id];
       const x2 = t.x;
       const y2 = t.y;
-      const d = calcDist(x,y,x2,y2);
-      if(d <= 100) {
+      const d = calcDist(x, y, x2, y2);
+      if (d <= 100) {
         generateSpawnpoint()
       }
     }
