@@ -5,8 +5,8 @@ interface Player {
   tag: boolean;
 }
 
-const players: Record<string, Player> = {};
 const sockets = new Map<string, WebSocket>();
+const players: Record<string, Player> = {};
 let tagCooldown = 0;
 
 setTimeout(updateTimer, 500);
@@ -42,16 +42,31 @@ Deno.serve(async (request) => {
     });
   }
 
-if (pathname === "/client.js") {
-  return new Response(Deno.readTextFileSync("./public/client.js"), {
-    headers: { "content-type": "application/javascript" },
-  });
-}
+  if (pathname === "/Sprites/player1.png") {
+    const image = await Deno.readFile("./public/Sprites/player1.png");
+    return new Response(image, {
+      headers: { "content-type": "image/png" },
+    });
+  }
 
-// WebSocket for game
-if (pathname === "/ws") {
-  if (request.headers.get("upgrade") !== "websocket") {
-    return new Response(null, { status: 501 });
+  if (pathname === "/Sprites/player2.png") {
+    const image = await Deno.readFile("./public/Sprites/player2.png");
+    return new Response(image, {
+      headers: { "content-type": "image/png" },
+    });
+  }
+
+  if (pathname === "/Sprites/player3.png") {
+    const image = await Deno.readFile("./public/Sprites/player3.png");
+    return new Response(image, {
+      headers: { "content-type": "image/png" },
+    });
+  }
+
+  if (pathname === "/client.js") {
+    return new Response(Deno.readTextFileSync("./public/client.js"), {
+      headers: { "content-type": "application/javascript" },
+    });
   }
 
   const { socket, response } = Deno.upgradeWebSocket(request);
@@ -71,28 +86,30 @@ if (pathname === "/ws") {
 
   socket.addEventListener("message", (event) => {
     const msg = JSON.parse(event.data);
+    const p = players[id];
+    if (!p) return;
+
     if (msg.type === "move") {
-      const p = players[id];
-      if (!p) return;
       if (msg.dir === "up") p.y -= 10;
       if (msg.dir === "down") p.y += 10;
       if (msg.dir === "left") p.x -= 10;
       if (msg.dir === "right") p.x += 10;
 
-      if (p.tag == true) {
-        for (const id in players) {
-          const runner = players[id];
-          if (runner == p) {
-            return
-          }
+      // Tag logic
+      if (p.tag && tagCooldown === 0) {
+        for (const otherId in players) {
+          if (otherId === id) continue;
+          const runner = players[otherId];
           const d = calcDist(p.x, p.y, runner.x, runner.y);
-          if (d > 30 && tagCooldown == 0) {
+          if (d > 30) {
             p.tag = false;
             runner.tag = true;
-            tagCooldown += 30;
+            tagCooldown = 30;
+            break;
           }
         }
       }
+
       broadcast({ type: "update", player: p });
     }
   });
@@ -105,17 +122,14 @@ if (pathname === "/ws") {
   });
 
   return response;
-}
-
-return new Response("Not found", { status: 404 });
 });
 
 function calcDist(x1: number, y1: number, x2: number, y2: number): number {
-  const distance = Math.sqrt((x2-x1)^2 + (y2-x2)^2);
+  const distance = Math.sqrt((x2 - x1) ^ 2 + (y2 - y1) ^ 2);
   return distance;
 }
 
-function updateTimer():void {
+function updateTimer(): void {
   if (tagCooldown > 0) {
     tagCooldown -= 1;
   }

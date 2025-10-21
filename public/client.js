@@ -1,11 +1,23 @@
-var canvas = document.getElementById("game");
-var ctx = canvas.getContext("2d");
-var protocol = location.protocol === "https:" ? "wss:" : "ws:";
-var socket = new WebSocket("".concat(protocol, "//").concat(location.host, "/ws"));
-var myId = null;
-var players = {};
-socket.addEventListener("message", function (event) {
-    var msg = JSON.parse(event.data);
+"use strict";
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+const protocol = location.protocol === "https:" ? "wss:" : "ws:";
+const socket = new WebSocket(`${protocol}//${location.host}/ws`);
+let myId = null;
+let players = {};
+const sprites = {
+    player1: new Image(),
+    player2: new Image(),
+    player3: new Image(),
+};
+sprites.player1.src = "Sprites/player1.png";
+sprites.player1.className = "sprite";
+sprites.player2.src = "Sprites/player2.png";
+sprites.player2.className = "sprite";
+sprites.player3.src = "Sprites/player3.png";
+sprites.player3.className = "sprite";
+socket.addEventListener("message", (event) => {
+    const msg = JSON.parse(event.data);
     if (msg.type === "init") {
         myId = msg.id;
         players = msg.players;
@@ -20,16 +32,16 @@ socket.addEventListener("message", function (event) {
         delete players[msg.id];
     }
 });
-document.addEventListener("keydown", function (e) {
+document.addEventListener("keydown", (e) => {
     if (["w", "a", "s", "d", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].indexOf(e.key) !== -1) {
         socket.send(JSON.stringify({ type: "move", dir: keyToDir(e.key) }));
     }
 });
-document.getElementById("controls").addEventListener("click", function (e) {
-    var target = e.target;
+document.getElementById("controls").addEventListener("click", (e) => {
+    const target = e.target;
     if (target.tagName === "BUTTON") {
-        var dir = target.id;
-        socket.send(JSON.stringify({ type: "move", dir: dir }));
+        const dir = target.id;
+        socket.send(JSON.stringify({ type: "move", dir }));
     }
 });
 function keyToDir(key) {
@@ -45,13 +57,28 @@ function keyToDir(key) {
         default: return "";
     }
 }
-function gameLoop() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    for (var id in players) {
-        var p = players[id];
-        ctx.fillStyle = id === myId ? "blue" : "red";
-        ctx.fillRect(p.x, p.y, 20, 20);
-    }
-    requestAnimationFrame(gameLoop);
+function createSprites() {
+    const sprite = document.createElement("img");
+    sprite.src = "Sprites/player1.png";
+    return sprite;
 }
-gameLoop();
+function gameLoop(sprite) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (const id in players) {
+        const p = players[id];
+        let img = id === myId ? sprites.player1 : sprites.player2;
+        if (p.tag == true) {
+            img = sprites.player3;
+        }
+        ctx.drawImage(img, p.x, p.y);
+        //ctx.fillStyle = id === myId ? "blue" : "red";
+        //ctx.fillRect(p.x, p.y, 20, 20);
+    }
+    requestAnimationFrame(() => gameLoop(sprite));
+}
+window.onload = function () {
+    const sprite = createSprites();
+    sprite.onload = function () {
+        gameLoop(sprite);
+    };
+};
