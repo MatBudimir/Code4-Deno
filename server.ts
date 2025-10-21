@@ -9,6 +9,30 @@ const sockets = new Map<string, WebSocket>();
 const players: Record<string, Player> = {};
 let tagCooldown = 0;
 
+// Obstacles 
+const obstacles = [
+  // Left corridor walls
+  { x: 100, y: 50, width: 30, height: 450 },
+  { x: 300, y: 50, width: 30, height: 450 },
+
+  // Right corridor walls
+  { x: 1300, y: 50, width: 30, height: 450 },
+  { x: 1500, y: 50, width: 30, height: 450 },
+
+  // Middle 
+  { x: 600, y: 100, width: 150, height: 30 },
+  { x: 800, y: 200, width: 150, height: 30 },
+  { x: 600, y: 300, width: 150, height: 30 },
+  { x: 800, y: 400, width: 150, height: 30 },
+
+  // Square
+  { x: 1150, y: 100, width: 80, height: 80 },
+
+  // Bottom 
+  { x: 500, y: 470, width: 200, height: 30 },
+  { x: 1000, y: 470, width: 200, height: 30 },
+];
+
 // Collision 
 function collides(x: number, y: number, size = 32): boolean {
   for (let i = 0; i < obstacles.length; i++) {
@@ -129,36 +153,33 @@ Deno.serve(async (request) => {
 
       broadcast({ type: "update", player: p });
     }
-  });
 
-
-  // Tag logic
-  if (p.tag && tagCooldown === 0) {
-    for (const otherId in players) {
-      if (otherId === id) continue;
-      const runner = players[otherId];
-      const d = calcDist(p.x, p.y, runner.x, runner.y);
-      if (d > 30) {
-        p.tag = false;
-        runner.tag = true;
-        tagCooldown = 30;
-        break;
+    // Tag logic
+    if (p.tag && tagCooldown === 0) {
+      for (const otherId in players) {
+        if (otherId === id) continue;
+        const runner = players[otherId];
+        const d = calcDist(p.x, p.y, runner.x, runner.y);
+        if (d > 30) {
+          p.tag = false;
+          runner.tag = true;
+          tagCooldown = 30;
+          break;
+        }
       }
     }
-  }
 
-  broadcast({ type: "update", player: p });
-}
+    broadcast({ type: "update", player: p });
   });
 
-socket.addEventListener("close", () => {
-  console.log(`Player ${id} disconnected`);
-  delete players[id];
-  sockets.delete(id);
-  broadcast({ type: "leave", id });
-});
+  socket.addEventListener("close", () => {
+    console.log(`Player ${id} disconnected`);
+    delete players[id];
+    sockets.delete(id);
+    broadcast({ type: "leave", id });
+  });
 
-return response;
+  return response;
 });
 
 function calcDist(x1: number, y1: number, x2: number, y2: number): number {
