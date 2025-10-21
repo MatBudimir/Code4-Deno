@@ -15,12 +15,15 @@ let players: Record<string, Player> = {};
 const sprites = {
   player1: new Image(),
   player2: new Image(),
+  player3: new Image(),
 };
 
 sprites.player1.src = "Sprites/player1.png";
 sprites.player1.className = "sprite"
 sprites.player2.src = "Sprites/player2.png";
 sprites.player2.className = "sprite"
+sprites.player3.src = "Sprites/player3.png";
+sprites.player3.className = "sprite"
 
 socket.addEventListener("message", (event: MessageEvent) => {
   const msg = JSON.parse(event.data);
