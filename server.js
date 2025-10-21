@@ -48,6 +48,12 @@ Deno.serve((request) => __awaiter(void 0, void 0, void 0, function* () {
             headers: { "content-type": "image/png" },
         });
     }
+    if (pathname === "/Sprites/player3.png") {
+        const image = yield Deno.readFile("./public/Sprites/player3.png");
+        return new Response(image, {
+            headers: { "content-type": "image/png" },
+        });
+    }
     if (pathname === "/client.js") {
         return new Response(Deno.readTextFileSync("./public/client.js"), {
             headers: { "content-type": "application/javascript" },
