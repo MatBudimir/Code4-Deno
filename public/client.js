@@ -75,25 +75,6 @@ function keyToDir(key) {
         default: return "";
     }
 }
-function collides(x, y, size = 32) {
-    for (let i = 0; i < obstacles.length; i++) {
-        const o = obstacles[i];
-        let playerLeft = x;
-        let playerRight = x + size;
-        let playerTop = y;
-        let playerBottom = y + size;
-        let obstacleLeft = o.x;
-        let obstacleRight = o.x + o.width;
-        let obstacleTop = o.y;
-        let obstacleBottom = o.y + o.height;
-        let overlapX = playerLeft < obstacleRight && playerRight > obstacleLeft;
-        let overlapY = playerTop < obstacleBottom && playerBottom > obstacleTop;
-        if (overlapX && overlapY) {
-            return true;
-        }
-    }
-    return false;
-}
 function createSprites() {
     const sprite = document.createElement("img");
     sprite.src = "Sprites/player1.png";
