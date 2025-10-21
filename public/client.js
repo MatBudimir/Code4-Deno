@@ -28,7 +28,7 @@ const obstacles = [
     { x: 800, y: 200, width: 150, height: 30 },
     { x: 600, y: 300, width: 150, height: 30 },
     { x: 800, y: 400, width: 150, height: 30 },
-    // Square
+    // Squares
     { x: 1150, y: 100, width: 80, height: 80 },
     // Bottom 
     { x: 500, y: 470, width: 200, height: 30 },

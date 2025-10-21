@@ -9,30 +9,6 @@ const sockets = new Map<string, WebSocket>();
 const players: Record<string, Player> = {};
 let tagCooldown = 0;
 
-// Obstacles 
-const obstacles = [
-  // Left corridor walls
-  { x: 100, y: 50, width: 30, height: 450 },
-  { x: 300, y: 50, width: 30, height: 450 },
-
-  // Right corridor walls
-  { x: 1300, y: 50, width: 30, height: 450 },
-  { x: 1500, y: 50, width: 30, height: 450 },
-
-  // Middle 
-  { x: 600, y: 100, width: 150, height: 30 },
-  { x: 800, y: 200, width: 150, height: 30 },
-  { x: 600, y: 300, width: 150, height: 30 },
-  { x: 800, y: 400, width: 150, height: 30 },
-
-  // Square
-  { x: 1150, y: 100, width: 80, height: 80 },
-
-  // Bottom 
-  { x: 500, y: 470, width: 200, height: 30 },
-  { x: 1000, y: 470, width: 200, height: 30 },
-];
-
 // Collision 
 function collides(x: number, y: number, size = 32): boolean {
   for (let i = 0; i < obstacles.length; i++) {
