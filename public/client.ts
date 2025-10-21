@@ -26,6 +26,30 @@ sprites.player2.className = "sprite"
 sprites.player3.src = "Sprites/player3.png";
 sprites.player3.className = "sprite"
 
+const obstacles = [
+  // Left corridor walls
+  { x: 100, y: 50, width: 30, height: 450 },
+  { x: 300, y: 50, width: 30, height: 450 },
+
+  // Right corridor walls
+  { x: 1300, y: 50, width: 30, height: 450 },
+  { x: 1500, y: 50, width: 30, height: 450 },
+
+  // Middle 
+  { x: 600, y: 100, width: 150, height: 30 },
+  { x: 800, y: 200, width: 150, height: 30 },
+  { x: 600, y: 300, width: 150, height: 30 },
+  { x: 800, y: 400, width: 150, height: 30 },
+
+  // Square
+  { x: 1150, y: 100, width: 80, height: 80 },
+
+  // Bottom 
+  { x: 500, y: 470, width: 200, height: 30 },
+  { x: 1000, y: 470, width: 200, height: 30 },
+];
+
+
 socket.addEventListener("message", (event: MessageEvent) => {
   const msg = JSON.parse(event.data);
   if (msg.type === "init") {
@@ -73,6 +97,14 @@ function createSprites() {
 
 function gameLoop(sprite: CanvasImageSource) {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // draw obstacles
+  ctx.fillStyle = "rgba(0,0,0,0.7)";
+  for (let i = 0; i < obstacles.length; i++) {
+    const o = obstacles[i];
+    ctx.fillRect(o.x, o.y, o.width, o.height);
+  }
+
   for (const id in players) {
     const p = players[id];
     let img = id === myId ? sprites.player1 : sprites.player2;
