@@ -38,6 +38,12 @@ Deno.serve((request) => __awaiter(void 0, void 0, void 0, function* () {
             headers: { "content-type": "image/jpeg" },
         });
     }
+    if (pathname === "/canvasbg.jpg") {
+        const image = yield Deno.readFile("./public/canvasbg.jpg");
+        return new Response(image, {
+            headers: { "content-type": "image/jpeg" },
+        });
+    }
     if (pathname === "/Sprites/player1.png") {
         const image = yield Deno.readFile("./public/Sprites/player1.png");
         return new Response(image, {
