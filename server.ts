@@ -8,6 +8,7 @@ interface Player {
 const sockets = new Map<string, WebSocket>();
 const players: Record<string, Player> = {};
 let tagCooldown = 0;
+let tagger = false;
 
 setTimeout(updateTimer, 500);
 
@@ -75,7 +76,14 @@ Deno.serve(async (request) => {
   const spawn = generateSpawnpoint();
   const spawnX = spawn[0];
   const spawnY = spawn[1];
-  players[id] = { id, x: spawnX, y: spawnY, tag: false };
+
+  let newPlayerTag = false;
+  if (!tagger) {
+    newPlayerTag = true;
+    tagger = true;
+  }
+
+  players[id] = { id, x: spawnX, y: spawnY, tag: newPlayerTag };
   sockets.set(id, socket);
 
   socket.addEventListener("open", () => {
@@ -116,6 +124,9 @@ Deno.serve(async (request) => {
 
   socket.addEventListener("close", () => {
     console.log(`Player ${id} disconnected`);
+    if(players[id].tag = true){
+      tagger = false;
+    }
     delete players[id];
     sockets.delete(id);
     broadcast({ type: "leave", id });
