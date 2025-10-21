@@ -31,6 +31,12 @@ Deno.serve((request) => {
     });
   }
 
+      if (pathname === "/background.jpg") {
+    return new Response(Deno.readTextFileSync("./public/background.jpg"), {
+      headers: { "content-type": "image/jpeg" },
+    });
+  }
+
   if (pathname === "/client.js") {
     return new Response(Deno.readTextFileSync("./public/client.js"), {
       headers: { "content-type": "application/javascript" },
