@@ -12,6 +12,14 @@ const socket = new WebSocket(`${protocol}//${location.host}/ws`);
 let myId: string | null = null;
 let players: Record<string, Player> = {};
 
+const sprites = {
+  player1: new Image(),
+  player2: new Image(),
+};
+
+sprites.player1.src = "Sprites/player1.png";
+sprites.player2.src = "Sprites/player2.png";
+
 socket.addEventListener("message", (event: MessageEvent) => {
   const msg = JSON.parse(event.data);
   if (msg.type === "init") {
@@ -50,16 +58,30 @@ function keyToDir(key: string): string {
   }
 }
 
-function gameLoop() {
+function createSprites() {
+  const sprite = document.createElement("img");
+  sprite.src = "Sprites/player1.png"
+
+  return sprite
+}
+
+function gameLoop(sprite: CanvasImageSource) {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   for (const id in players) {
     const p = players[id];
-    ctx.fillStyle = id === myId ? "blue" : "red";
-    ctx.fillRect(p.x, p.y, 20, 20);
+     requestAnimationFrame(gameLoop);
+    ctx.drawImage(sprite, p.x, p.y);
+    //ctx.fillStyle = id === myId ? "blue" : "red";
+    //ctx.fillRect(p.x, p.y, 20, 20);
   }
-  requestAnimationFrame(gameLoop);
+  requestAnimationFrame(() => gameLoop(sprite));
 }
+
 window.onload = function () {
-  gameLoop();
-}
+  const sprite = createSprites();
+
+  sprite.onload = function () {
+    gameLoop(sprite);
+  };
+};
 
