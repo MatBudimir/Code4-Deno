@@ -122,31 +122,39 @@ Deno.serve((request) => __awaiter(void 0, void 0, void 0, function* () {
         if (!p)
             return;
         if (msg.type === "move") {
+            let newX = p.x;
+            let newY = p.y;
             if (msg.dir === "up")
-                p.y -= 10;
+                newY -= 10;
             if (msg.dir === "down")
-                p.y += 10;
+                newY += 10;
             if (msg.dir === "left")
-                p.x -= 10;
+                newX -= 10;
             if (msg.dir === "right")
-                p.x += 10;
-            // Tag logic
-            if (p.tag && tagCooldown === 0) {
-                for (const otherId in players) {
-                    if (otherId === id)
-                        continue;
-                    const runner = players[otherId];
-                    const d = calcDist(p.x, p.y, runner.x, runner.y);
-                    if (d > 30) {
-                        p.tag = false;
-                        runner.tag = true;
-                        tagCooldown = 30;
-                        break;
-                    }
-                }
+                newX += 10;
+            // only update if not colliding
+            if (collides(newX, newY) === false) {
+                p.x = newX;
+                p.y = newY;
             }
             broadcast({ type: "update", player: p });
         }
+        // Tag logic
+        if (p.tag && tagCooldown === 0) {
+            for (const otherId in players) {
+                if (otherId === id)
+                    continue;
+                const runner = players[otherId];
+                const d = calcDist(p.x, p.y, runner.x, runner.y);
+                if (d > 30) {
+                    p.tag = false;
+                    runner.tag = true;
+                    tagCooldown = 30;
+                    break;
+                }
+            }
+        }
+        broadcast({ type: "update", player: p });
     });
     socket.addEventListener("close", () => {
         console.log(`Player ${id} disconnected`);
