@@ -10,6 +10,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 const players = {};
 const sockets = new Map();
+let tagCooldown = 0;
+setTimeout(updateTimer, 500);
 function broadcast(message, except) {
     for (const [id, socket] of sockets) {
         if (id !== except) {
@@ -59,14 +61,48 @@ Deno.serve((request) => __awaiter(void 0, void 0, void 0, function* () {
             headers: { "content-type": "application/javascript" },
         });
     }
-    // WebSocket for game
-    if (pathname === "/ws") {
-        if (request.headers.get("upgrade") !== "websocket") {
-            return new Response(null, { status: 501 });
+    const { socket, response } = Deno.upgradeWebSocket(request);
+    const id = crypto.randomUUID();
+    players[id] = { id, x: 100, y: 100, tag: false };
+    sockets.set(id, socket);
+    socket.addEventListener("open", () => {
+        console.log(`Player ${id} connected`);
+        socket.send(JSON.stringify({ type: "init", id, players }));
+        broadcast({ type: "join", player: players[id] }, id);
+    });
+    socket.addEventListener("message", (event) => {
+        const msg = JSON.parse(event.data);
+        if (msg.type === "move") {
+            const p = players[id];
+            if (!p)
+                return;
+            if (msg.dir === "up")
+                p.y -= 10;
+            if (msg.dir === "down")
+                p.y += 10;
+            if (msg.dir === "left")
+                p.x -= 10;
+            if (msg.dir === "right")
+                p.x += 10;
+            if (p.tag == true) {
+                for (const id in players) {
+                    const runner = players[id];
+                    if (runner == p) {
+                        return;
+                    }
+                    const d = calcDist(p.x, p.y, runner.x, runner.y);
+                    if (d > 30 && tagCooldown == 0) {
+                        p.tag = false;
+                        runner.tag = true;
+                        tagCooldown += 30;
+                    }
+                }
+            }
+            broadcast({ type: "update", player: p });
         }
         const { socket, response } = Deno.upgradeWebSocket(request);
         const id = crypto.randomUUID();
-        players[id] = { id, x: 100, y: 100 };
+        players[id] = { id, x: 100, y: 100, tag: false };
         sockets.set(id, socket);
         socket.addEventListener("open", () => {
             console.log(`Player ${id} connected`);
@@ -97,6 +133,23 @@ Deno.serve((request) => __awaiter(void 0, void 0, void 0, function* () {
             broadcast({ type: "leave", id });
         });
         return response;
-    }
+    });
     return new Response("Not found", { status: 404 });
 }));
+function calcDist(x1, y1, x2, y2) {
+    const distance = Math.sqrt((x2 - x1) ^ 2 + (y2 - x2) ^ 2);
+    return distance;
+}
+function updateTimer() {
+    if (tagCooldown > 0) {
+        tagCooldown -= 1;
+    }
+}
+function generateSpawnpoint() {
+    const pos = [];
+    const x = Math.floor(Math.random() * 1600);
+    const y = Math.floor(Math.random() * 550);
+    pos.push(x);
+    pos.push(y);
+    return pos;
+}
