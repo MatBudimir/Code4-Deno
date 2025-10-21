@@ -88,6 +88,8 @@ function keyToDir(key: string): string {
   }
 }
 
+
+
 function createSprites() {
   const sprite = document.createElement("img");
   sprite.src = "Sprites/player1.png"
