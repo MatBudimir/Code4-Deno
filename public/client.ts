@@ -33,11 +33,11 @@ document.addEventListener("keydown", (e: KeyboardEvent) => {
 });
 
 document.getElementById("controls")!.addEventListener("click", (e: MouseEvent) => {
-    const target = e.target as HTMLButtonElement;
-    if (target.tagName === "BUTTON") {
-        const dir = target.id;
-        socket.send(JSON.stringify({ type: "move", dir }));
-    }
+  const target = e.target as HTMLButtonElement;
+  if (target.tagName === "BUTTON") {
+    const dir = target.id;
+    socket.send(JSON.stringify({ type: "move", dir }));
+  }
 });
 
 function keyToDir(key: string): string {
@@ -59,4 +59,7 @@ function gameLoop() {
   }
   requestAnimationFrame(gameLoop);
 }
-gameLoop();
+window.onload = function () {
+  gameLoop();
+}
+
