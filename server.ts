@@ -7,7 +7,7 @@ interface Player {
 
 const sockets = new Map<string, WebSocket>();
 const players: Record<string, Player> = {};
-let tagCooldown = 0;
+let canTag = true;
 let tagger = false;
 
 const CANVAS_WIDTH = 1600;
@@ -62,8 +62,6 @@ function collides(x: number, y: number, size = 32): boolean {
   }
   return false;
 }
-
-setTimeout(updateTimer, 500);
 
 function broadcast(message: unknown, except?: string) {
   for (const [id, socket] of sockets) {
@@ -168,7 +166,7 @@ Deno.serve(async (request) => {
     }
 
     // Tag logic
-    if (p.tag && tagCooldown === 0) {
+    if (p.tag && canTag === true) {
       for (const otherId in players) {
         if (otherId === id) continue;
         const runner = players[otherId];
@@ -176,7 +174,8 @@ Deno.serve(async (request) => {
         if (d < 30) {
           p.tag = false;
           runner.tag = true;
-          tagCooldown = 30;
+          canTag = false;
+          setTimeout(updateCooldown, 2000);
 
           broadcast({ type: "update", player: p });
           broadcast({ type: "update", player: runner });
@@ -219,10 +218,8 @@ function calcDist(x1: number, y1: number, x2: number, y2: number): number {
   return distance;
 }
 
-function updateTimer(): void {
-  if (tagCooldown > 0) {
-    tagCooldown -= 1;
-  }
+function updateCooldown(): void {
+  canTag = true
 }
 
 function generateSpawnpoint(): number[] {
