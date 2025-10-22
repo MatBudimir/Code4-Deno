@@ -122,7 +122,7 @@ function gameLoop(sprite: CanvasImageSource) {
     //ctx.fillStyle = id === myId ? "blue" : "red";
     //ctx.fillRect(p.x, p.y, 20, 20);
   }
-  requestAnimationFrame(() => gameLoop(sprite));
+  setTimeout(gameLoop, 33, sprite);
 }
 
 window.onload = function () {
